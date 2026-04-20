@@ -5,13 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Snake Game with Google OAuth</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons for premium UI icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Google Identity Services Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <script>
@@ -96,22 +92,17 @@
 </head>
 <body class="min-h-screen flex items-center justify-center font-sans antialiased relative">
 
-    <!-- Ambient Animated Background -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
         <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob"></div>
         <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-emerald-600/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-2000"></div>
         <div class="absolute -bottom-8 left-1/3 w-96 h-96 bg-teal-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-4000"></div>
         
-        <!-- Subtle Grid Overlay -->
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50"></div>
     </div>
 
-    <!-- Main Container -->
     <div class="w-full max-w-5xl p-4 md:p-6 relative z-10">
         
-        <!-- Premium Login Section -->
         <div id="login-section" class="glass-card p-10 md:p-14 rounded-[2rem] max-w-lg mx-auto text-center transform transition-all relative overflow-hidden">
-            <!-- Decorative corner glow -->
             <div class="absolute -top-20 -right-20 w-40 h-40 bg-green-500/30 blur-[60px] rounded-full pointer-events-none"></div>
 
             <div class="mb-10 relative">
@@ -125,17 +116,14 @@
             </div>
             
             <div class="relative group">
-                <!-- Glowing border behind Google button -->
                 <div class="absolute -inset-1 bg-gradient-to-r from-green-500 to-teal-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <div class="relative bg-black/50 p-6 rounded-3xl border border-white/5 backdrop-blur-sm">
                     <p class="text-sm text-gray-400 mb-5 font-medium">Connect your account to play</p>
                     
-                    <!-- Google Sign-In Button Container -->
                     <div id="buttonDiv" class="flex justify-center transform transition active:scale-95"></div>
                 </div>
             </div>
 
-            <!-- Features list -->
             <div class="mt-10 flex justify-center items-center gap-6 text-xs text-gray-500 font-medium">
                 <div class="flex items-center gap-1.5"><i class="ph ph-cloud-check text-green-400 text-lg"></i> Cloud Save</div>
                 <div class="flex items-center gap-1.5"><i class="ph ph-lightning text-yellow-400 text-lg"></i> 60 FPS</div>
@@ -144,15 +132,13 @@
             
             <div class="mt-8 pt-6 border-t border-white/5">
                 <p class="text-xs text-rose-400/80 bg-rose-500/10 py-2 px-4 rounded-xl border border-rose-500/20 inline-block">
-                    <i class="ph ph-warning-circle align-middle mr-1"></i> Developer: Insert '80116814697-fmqidduq28ubj101ff5fnmcsk2oevt53.apps.googleusercontent.com'
+                    <i class="ph ph-warning-circle align-middle mr-1"></i> Developer: Insert 'YOUR_GOOGLE_CLIENT_ID'
                 </p>
             </div>
         </div>
 
-        <!-- Game & Profile Section -->
         <div id="game-section" class="hidden flex-col lg:flex-row gap-6 md:gap-8 items-start justify-center">
             
-            <!-- User Profile & Stats Card -->
             <div class="glass-card p-8 rounded-[2rem] w-full lg:w-80 flex flex-col items-center text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-green-500/10 to-transparent pointer-events-none"></div>
                 
@@ -182,7 +168,6 @@
                 </button>
             </div>
 
-            <!-- Game Area -->
             <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full lg:flex-1 max-w-2xl flex flex-col items-center relative">
                 
                 <div class="w-full flex justify-between items-center mb-6 px-2">
@@ -196,7 +181,6 @@
                 <div class="relative w-full flex justify-center">
                     <canvas id="gameCanvas" width="400" height="400" class="border border-white/5"></canvas>
                     
-                    <!-- Game Over Overlay -->
                     <div id="game-over-screen" class="absolute inset-0 bg-black/80 backdrop-blur-md hidden flex-col items-center justify-center rounded-2xl z-20">
                         <h2 class="text-5xl font-display font-black text-white mb-2 tracking-widest drop-shadow-[0_0_15px_rgba(248,113,113,0.8)]">GAME OVER</h2>
                         <div class="bg-white/5 px-6 py-3 rounded-2xl border border-white/10 mb-8 mt-4">
@@ -209,7 +193,6 @@
                     </div>
                 </div>
 
-                <!-- Mobile Controls -->
                 <div class="grid grid-cols-3 gap-3 mt-8 md:hidden w-52 mx-auto">
                     <div></div>
                     <button onclick="changeDirection({keyCode: 38})" class="btn-mobile w-14 h-14 rounded-2xl flex justify-center items-center mx-auto text-gray-400 hover:text-white">
@@ -248,29 +231,38 @@
 
     <script>
         // ==========================================
-        // Google Authentication Logic
+        // Google Authentication Logic (With LocalStorage)
         // ==========================================
-        const CLIENT_ID = '80116814697-fmqidduq28ubj101ff5fnmcsk2oevt53.apps.googleusercontent.com';
+        const CLIENT_ID = '80116814697-fmqidduq28ubj101ff5fnmcsk2oevt53.apps.googleusercontent.com'; // এখানে আপনার Client ID দিন
 
         window.onload = function () {
-            google.accounts.id.initialize({
-                client_id: CLIENT_ID,
-                callback: handleCredentialResponse
-            });
-            
-            // Render highly customized Google Button
-            google.accounts.id.renderButton(
-                document.getElementById("buttonDiv"),
-                { 
-                    theme: "filled_black", 
-                    size: "large", 
-                    shape: "pill", 
-                    width: "280",
-                    logo_alignment: "left"
-                } 
-            );
-            
             loadHighScore();
+            
+            // চেক করা হচ্ছে লোকাল স্টোরেজে আগে থেকেই ইউজারের ডেটা আছে কিনা
+            const savedUser = localStorage.getItem('snakeGameUser');
+            
+            if (savedUser) {
+                // ইউজার লগইন করা থাকলে সরাসরি গেম স্ক্রিন দেখাবে
+                const userData = JSON.parse(savedUser);
+                showGameScreen(userData, false);
+            } else {
+                // ইউজার লগইন করা না থাকলে গুগল বাটন ইনিশিয়ালাইজ করবে
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: handleCredentialResponse
+                });
+                
+                google.accounts.id.renderButton(
+                    document.getElementById("buttonDiv"),
+                    { 
+                        theme: "filled_black", 
+                        size: "large", 
+                        shape: "pill", 
+                        width: "280",
+                        logo_alignment: "left"
+                    } 
+                );
+            }
         };
 
         function decodeJwtResponse(token) {
@@ -285,38 +277,61 @@
         function handleCredentialResponse(response) {
             const responsePayload = decodeJwtResponse(response.credential);
 
-            // Fetch higher res profile pic if possible
             let picUrl = responsePayload.picture;
             if(picUrl.includes('=s96-c')) {
                 picUrl = picUrl.replace('=s96-c', '=s400-c');
             }
 
-            document.getElementById('user-name').textContent = responsePayload.name;
-            document.getElementById('user-email').textContent = responsePayload.email;
-            document.getElementById('user-pic').src = picUrl;
+            const userData = {
+                name: responsePayload.name,
+                email: responsePayload.email,
+                picture: picUrl
+            };
 
-            // Animate transition
+            // লগইন সফল হলে ডেটা লোকাল স্টোরেজে সেভ করা হচ্ছে
+            localStorage.setItem('snakeGameUser', JSON.stringify(userData));
+
+            // গেম স্ক্রিন দেখানো হচ্ছে
+            showGameScreen(userData, true);
+        }
+
+        function showGameScreen(userData, animate) {
+            document.getElementById('user-name').textContent = userData.name;
+            document.getElementById('user-email').textContent = userData.email;
+            document.getElementById('user-pic').src = userData.picture;
+
             const loginSec = document.getElementById('login-section');
-            loginSec.style.opacity = '0';
-            loginSec.style.transform = 'scale(0.95)';
-            
-            setTimeout(() => {
-                loginSec.classList.add('hidden');
-                document.getElementById('game-section').classList.remove('hidden');
-                document.getElementById('game-section').classList.add('flex');
-                
-                // Slight fade in for game section
-                document.getElementById('game-section').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('game-section').style.transition = 'opacity 0.5s ease';
-                    document.getElementById('game-section').style.opacity = '1';
-                }, 50);
+            const gameSec = document.getElementById('game-section');
 
+            if (animate) {
+                loginSec.style.opacity = '0';
+                loginSec.style.transform = 'scale(0.95)';
+                
+                setTimeout(() => {
+                    loginSec.classList.add('hidden');
+                    gameSec.classList.remove('hidden');
+                    gameSec.classList.add('flex');
+                    
+                    gameSec.style.opacity = '0';
+                    setTimeout(() => {
+                        gameSec.style.transition = 'opacity 0.5s ease';
+                        gameSec.style.opacity = '1';
+                    }, 50);
+
+                    resetGame();
+                }, 300);
+            } else {
+                loginSec.classList.add('hidden');
+                gameSec.classList.remove('hidden');
+                gameSec.classList.add('flex');
+                gameSec.style.opacity = '1';
                 resetGame();
-            }, 300);
+            }
         }
 
         function signOut() {
+            localStorage.removeItem('snakeGameUser');
+
             document.getElementById('game-section').classList.add('hidden');
             document.getElementById('game-section').classList.remove('flex');
             
@@ -329,6 +344,7 @@
             }, 50);
 
             clearTimeout(gameLoopTimeout);
+            location.reload();
         }
 
         // ==========================================
@@ -366,7 +382,6 @@
                 localStorage.setItem('snakePremiumHighScore', highScore);
                 highScoreDisplay.textContent = highScore;
                 
-                // Celebrate High Score
                 highScoreDisplay.classList.add('text-yellow-400');
                 setTimeout(() => highScoreDisplay.classList.remove('text-yellow-400'), 1000);
             }
@@ -410,7 +425,7 @@
                 advanceSnake();
                 drawSnake();
                 main();
-            }, 90); // Slightly faster for pro feel
+            }, 90); 
         }
 
         function clearCanvas() {
@@ -454,14 +469,13 @@
                 ctx.shadowBlur = isHead ? 20 : 5;
                 ctx.shadowColor = '#00ff88';
                 
-                // Gradient for head
                 if (isHead) {
                     let grad = ctx.createLinearGradient(part.x * gridSize, part.y * gridSize, (part.x+1) * gridSize, (part.y+1) * gridSize);
                     grad.addColorStop(0, '#00ff88');
                     grad.addColorStop(1, '#00b8ff');
                     ctx.fillStyle = grad;
                 } else {
-                    ctx.fillStyle = `rgba(0, 255, 136, ${1 - (index/snake.length)*0.6})`; // Fading tail
+                    ctx.fillStyle = `rgba(0, 255, 136, ${1 - (index/snake.length)*0.6})`; 
                 }
                 
                 ctx.roundRect(
@@ -485,7 +499,6 @@
                 score += 10;
                 scoreDisplay.textContent = score;
                 
-                // Score pop animation
                 scoreDisplay.style.transform = 'scale(1.3)';
                 setTimeout(() => {
                     scoreDisplay.style.transform = 'scale(1)';
@@ -499,7 +512,7 @@
 
         function drawFood() {
             ctx.shadowBlur = 15;
-            ctx.shadowColor = '#f43f5e'; // Rose-500 glow
+            ctx.shadowColor = '#f43f5e'; 
             
             let grad = ctx.createRadialGradient(
                 food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, 2,
