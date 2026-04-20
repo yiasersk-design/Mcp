@@ -5,10 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Snake Game with Google OAuth</title>
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons for premium UI icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Google Identity Services Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -16,13 +18,25 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Poppins', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Syncopate', 'sans-serif']
+                    },
                     colors: {
-                        darkBg: '#0b0f19',
-                        glass: 'rgba(255, 255, 255, 0.05)',
-                        glassBorder: 'rgba(255, 255, 255, 0.1)',
-                        neonGreen: '#4ade80',
-                        neonRed: '#f87171'
+                        darkBg: '#050505',
+                        neonGreen: '#00ff88',
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
                     }
                 }
             }
@@ -31,145 +45,202 @@
 
     <style>
         body {
-            background: radial-gradient(circle at top left, #1e293b, #0b0f19);
+            background-color: #050505;
             color: #e2e8f0;
             -ms-overflow-style: none;
             scrollbar-width: none;
+            overflow-x: hidden;
         }
         body::-webkit-scrollbar { display: none; }
         
-        /* Glassmorphism Styles */
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Premium Glassmorphism */
         .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #00ff88, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* Canvas Styling */
         canvas {
-            background-color: #0f172a;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
+            background-color: #0a0a0a;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
             max-width: 100%;
             height: auto;
             display: block;
         }
 
-        /* Text Glow */
-        .neon-text-green { text-shadow: 0 0 15px rgba(74, 222, 128, 0.6); }
-        .neon-text-red { text-shadow: 0 0 15px rgba(248, 113, 113, 0.6); }
-
         /* Custom Buttons */
         .btn-mobile {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.2s ease;
         }
         .btn-mobile:active {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0.95);
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.5);
+            transform: scale(0.92);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center font-sans antialiased">
+<body class="min-h-screen flex items-center justify-center font-sans antialiased relative">
+
+    <!-- Ambient Animated Background -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
+        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob"></div>
+        <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-emerald-600/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-1/3 w-96 h-96 bg-teal-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-4000"></div>
+        
+        <!-- Subtle Grid Overlay -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50"></div>
+    </div>
 
     <!-- Main Container -->
-    <div class="w-full max-w-5xl p-4 md:p-6">
+    <div class="w-full max-w-5xl p-4 md:p-6 relative z-10">
         
-        <!-- Login Section -->
-        <div id="login-section" class="glass-card p-10 rounded-3xl max-w-md mx-auto text-center transform transition-all">
-            <div class="mb-8">
-                <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.4)] mb-6 transform rotate-12">
-                    <svg class="w-10 h-10 text-white transform -rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <!-- Premium Login Section -->
+        <div id="login-section" class="glass-card p-10 md:p-14 rounded-[2rem] max-w-lg mx-auto text-center transform transition-all relative overflow-hidden">
+            <!-- Decorative corner glow -->
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-green-500/30 blur-[60px] rounded-full pointer-events-none"></div>
+
+            <div class="mb-10 relative">
+                <div class="w-24 h-24 mx-auto bg-gradient-to-tr from-green-400 to-teal-600 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(0,255,136,0.3)] mb-8 transform -rotate-6 transition-transform hover:rotate-0 duration-500">
+                    <i class="ph ph-snake text-5xl text-white"></i>
                 </div>
-                <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">SNAKE <span class="text-green-400">X</span></h1>
-                <p class="text-gray-400 text-sm">Sign in to start your premium gaming experience.</p>
+                <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-3 tracking-widest uppercase">
+                    SNAKE <span class="text-gradient">X</span>
+                </h1>
+                <p class="text-gray-400 font-medium tracking-wide">Enter the next generation arcade</p>
             </div>
             
-            <div class="bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
-                <!-- Google Sign-In Button Container -->
-                <div id="buttonDiv" class="flex justify-center"></div>
+            <div class="relative group">
+                <!-- Glowing border behind Google button -->
+                <div class="absolute -inset-1 bg-gradient-to-r from-green-500 to-teal-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative bg-black/50 p-6 rounded-3xl border border-white/5 backdrop-blur-sm">
+                    <p class="text-sm text-gray-400 mb-5 font-medium">Connect your account to play</p>
+                    
+                    <!-- Google Sign-In Button Container -->
+                    <div id="buttonDiv" class="flex justify-center transform transition active:scale-95"></div>
+                </div>
+            </div>
+
+            <!-- Features list -->
+            <div class="mt-10 flex justify-center items-center gap-6 text-xs text-gray-500 font-medium">
+                <div class="flex items-center gap-1.5"><i class="ph ph-cloud-check text-green-400 text-lg"></i> Cloud Save</div>
+                <div class="flex items-center gap-1.5"><i class="ph ph-lightning text-yellow-400 text-lg"></i> 60 FPS</div>
+                <div class="flex items-center gap-1.5"><i class="ph ph-trophy text-orange-400 text-lg"></i> High Scores</div>
             </div>
             
-            <p class="text-xs text-rose-400/80 mt-4 bg-rose-500/10 py-2 px-3 rounded-lg border border-rose-500/20">
-                Note: Don't forget to insert your 'YOUR_GOOGLE_CLIENT_ID' in the code.
-            </p>
+            <div class="mt-8 pt-6 border-t border-white/5">
+                <p class="text-xs text-rose-400/80 bg-rose-500/10 py-2 px-4 rounded-xl border border-rose-500/20 inline-block">
+                    <i class="ph ph-warning-circle align-middle mr-1"></i> Developer: Insert '80116814697-fmqidduq28ubj101ff5fnmcsk2oevt53.apps.googleusercontent.com'
+                </p>
+            </div>
         </div>
 
         <!-- Game & Profile Section -->
-        <div id="game-section" class="hidden flex flex-col lg:flex-row gap-6 md:gap-8 items-start justify-center">
+        <div id="game-section" class="hidden flex-col lg:flex-row gap-6 md:gap-8 items-start justify-center">
             
             <!-- User Profile & Stats Card -->
-            <div class="glass-card p-6 rounded-3xl w-full lg:w-80 flex flex-col items-center text-center relative overflow-hidden">
-                <!-- Decorative gradient blob -->
-                <div class="absolute -top-10 -right-10 w-32 h-32 bg-green-500/20 rounded-full blur-3xl"></div>
+            <div class="glass-card p-8 rounded-[2rem] w-full lg:w-80 flex flex-col items-center text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-green-500/10 to-transparent pointer-events-none"></div>
                 
-                <div class="relative mb-4 group">
-                    <div class="absolute inset-0 bg-green-400 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                    <img id="user-pic" src="" alt="Profile" class="relative w-24 h-24 rounded-full border-2 border-white/20 object-cover z-10">
+                <div class="relative mb-5 group">
+                    <div class="absolute inset-0 bg-green-400 rounded-full blur-md opacity-40 group-hover:opacity-70 transition duration-300"></div>
+                    <img id="user-pic" src="" alt="Profile" class="relative w-28 h-28 rounded-full border-2 border-green-400/50 object-cover z-10 shadow-xl">
                 </div>
                 
-                <h2 id="user-name" class="text-xl font-bold text-white tracking-wide">Player Name</h2>
-                <p id="user-email" class="text-gray-400 text-xs mb-8">player@email.com</p>
+                <h2 id="user-name" class="text-2xl font-bold text-white tracking-wide">Player</h2>
+                <p id="user-email" class="text-gray-400 text-sm mb-8 font-medium">player@email.com</p>
                 
-                <div class="w-full grid grid-cols-2 gap-3 mb-8">
-                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
-                        <p class="text-gray-400 uppercase text-[10px] font-bold tracking-widest mb-1">Score</p>
-                        <p id="score-display" class="text-3xl font-black text-green-400 neon-text-green">0</p>
+                <div class="w-full grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-black/30 p-5 rounded-2xl border border-white/5 flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
+                        <p class="text-gray-500 uppercase text-[10px] font-bold tracking-widest mb-1 relative z-10">Score</p>
+                        <p id="score-display" class="text-4xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(0,255,136,0.5)] relative z-10 transition-transform duration-150">0</p>
                     </div>
-                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
-                        <p class="text-gray-400 uppercase text-[10px] font-bold tracking-widest mb-1">Best</p>
-                        <p id="high-score-display" class="text-2xl font-bold text-white">0</p>
+                    <div class="bg-black/30 p-5 rounded-2xl border border-white/5 flex flex-col justify-center">
+                        <p class="text-gray-500 uppercase text-[10px] font-bold tracking-widest mb-1">Best</p>
+                        <p id="high-score-display" class="text-3xl font-bold text-white">0</p>
                     </div>
                 </div>
                 
-                <button onclick="signOut()" class="w-full group relative px-4 py-3 font-semibold text-white transition-all duration-300 bg-transparent border border-rose-500/50 rounded-xl hover:bg-rose-500/10 hover:border-rose-500 focus:outline-none">
-                    <span class="text-sm tracking-wider">SIGN OUT</span>
+                <button onclick="signOut()" class="w-full group relative px-4 py-3.5 font-semibold text-gray-300 transition-all duration-300 bg-white/5 border border-white/10 rounded-xl hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/50 focus:outline-none flex justify-center items-center gap-2">
+                    <i class="ph ph-sign-out text-lg"></i>
+                    <span class="text-sm tracking-wider uppercase">Disconnect</span>
                 </button>
             </div>
 
             <!-- Game Area -->
-            <div class="glass-card p-6 md:p-8 rounded-3xl w-full lg:flex-1 max-w-2xl flex flex-col items-center relative">
+            <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full lg:flex-1 max-w-2xl flex flex-col items-center relative">
                 
+                <div class="w-full flex justify-between items-center mb-6 px-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                        <span class="text-sm font-medium text-gray-400 tracking-wider">LIVE</span>
+                    </div>
+                    <div class="font-display font-bold text-xl text-white/50">SNAKE <span class="text-green-500/50">X</span></div>
+                </div>
+
                 <div class="relative w-full flex justify-center">
-                    <canvas id="gameCanvas" width="400" height="400" class="border border-white/10"></canvas>
+                    <canvas id="gameCanvas" width="400" height="400" class="border border-white/5"></canvas>
                     
                     <!-- Game Over Overlay -->
-                    <div id="game-over-screen" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center rounded-xl z-20 transition-opacity">
-                        <h2 class="text-4xl font-black text-white mb-2 tracking-widest neon-text-red">GAME OVER</h2>
-                        <p class="text-gray-300 mb-8 font-medium">Final Score: <span id="final-score" class="text-green-400 font-bold text-xl">0</span></p>
-                        <button onclick="resetGame()" class="bg-green-500 hover:bg-green-400 text-slate-900 font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(74,222,128,0.4)] transition transform hover:-translate-y-1 hover:scale-105 active:scale-95 tracking-wide">
-                            PLAY AGAIN
+                    <div id="game-over-screen" class="absolute inset-0 bg-black/80 backdrop-blur-md hidden flex-col items-center justify-center rounded-2xl z-20">
+                        <h2 class="text-5xl font-display font-black text-white mb-2 tracking-widest drop-shadow-[0_0_15px_rgba(248,113,113,0.8)]">GAME OVER</h2>
+                        <div class="bg-white/5 px-6 py-3 rounded-2xl border border-white/10 mb-8 mt-4">
+                            <p class="text-gray-400 font-medium text-sm uppercase tracking-widest">Final Score</p>
+                            <p id="final-score" class="text-green-400 font-black text-3xl mt-1 text-center">0</p>
+                        </div>
+                        <button onclick="resetGame()" class="bg-gradient-to-r from-green-400 to-teal-500 hover:from-green-300 hover:to-teal-400 text-black font-bold py-4 px-10 rounded-full shadow-[0_0_30px_rgba(0,255,136,0.3)] transition transform hover:-translate-y-1 hover:scale-105 active:scale-95 tracking-widest uppercase text-sm flex items-center gap-2">
+                            <i class="ph ph-arrow-counter-clockwise text-xl"></i> Play Again
                         </button>
                     </div>
                 </div>
 
-                <!-- Mobile Controls (Premium UI) -->
-                <div class="grid grid-cols-3 gap-3 mt-8 md:hidden w-48 mx-auto">
+                <!-- Mobile Controls -->
+                <div class="grid grid-cols-3 gap-3 mt-8 md:hidden w-52 mx-auto">
                     <div></div>
-                    <button onclick="changeDirection({keyCode: 38})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    <button onclick="changeDirection({keyCode: 38})" class="btn-mobile w-14 h-14 rounded-2xl flex justify-center items-center mx-auto text-gray-400 hover:text-white">
+                        <i class="ph ph-caret-up text-2xl"></i>
                     </button>
                     <div></div>
-                    <button onclick="changeDirection({keyCode: 37})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
-                        <svg class="w-6 h-6 transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    <button onclick="changeDirection({keyCode: 37})" class="btn-mobile w-14 h-14 rounded-2xl flex justify-center items-center mx-auto text-gray-400 hover:text-white">
+                        <i class="ph ph-caret-left text-2xl"></i>
                     </button>
-                    <button onclick="changeDirection({keyCode: 40})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
-                        <svg class="w-6 h-6 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    <button onclick="changeDirection({keyCode: 40})" class="btn-mobile w-14 h-14 rounded-2xl flex justify-center items-center mx-auto text-gray-400 hover:text-white">
+                        <i class="ph ph-caret-down text-2xl"></i>
                     </button>
-                    <button onclick="changeDirection({keyCode: 39})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
-                        <svg class="w-6 h-6 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    <button onclick="changeDirection({keyCode: 39})" class="btn-mobile w-14 h-14 rounded-2xl flex justify-center items-center mx-auto text-gray-400 hover:text-white">
+                        <i class="ph ph-caret-right text-2xl"></i>
                     </button>
                 </div>
 
-                <div class="mt-6 flex items-center justify-center gap-2 hidden md:flex text-gray-500 text-sm font-medium">
-                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">W</kbd>
-                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">A</kbd>
-                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">S</kbd>
-                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">D</kbd>
-                    <span class="ml-2">or Arrow Keys to move</span>
+                <div class="mt-8 flex items-center justify-center gap-3 hidden md:flex text-gray-500 text-sm font-medium">
+                    <div class="flex gap-1">
+                        <kbd class="bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 shadow-sm">W</kbd>
+                        <kbd class="bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 shadow-sm">A</kbd>
+                        <kbd class="bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 shadow-sm">S</kbd>
+                        <kbd class="bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 shadow-sm">D</kbd>
+                    </div>
+                    <span class="mx-2 text-gray-600">or</span>
+                    <div class="flex gap-1 text-lg">
+                        <kbd class="bg-white/5 px-2.5 py-1 rounded-lg border border-white/10"><i class="ph ph-arrow-up"></i></kbd>
+                        <kbd class="bg-white/5 px-2.5 py-1 rounded-lg border border-white/10"><i class="ph ph-arrow-left"></i></kbd>
+                        <kbd class="bg-white/5 px-2.5 py-1 rounded-lg border border-white/10"><i class="ph ph-arrow-down"></i></kbd>
+                        <kbd class="bg-white/5 px-2.5 py-1 rounded-lg border border-white/10"><i class="ph ph-arrow-right"></i></kbd>
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,9 +258,16 @@
                 callback: handleCredentialResponse
             });
             
+            // Render highly customized Google Button
             google.accounts.id.renderButton(
                 document.getElementById("buttonDiv"),
-                { theme: "filled_black", size: "large", shape: "pill", width: "250" } 
+                { 
+                    theme: "filled_black", 
+                    size: "large", 
+                    shape: "pill", 
+                    width: "280",
+                    logo_alignment: "left"
+                } 
             );
             
             loadHighScore();
@@ -207,26 +285,54 @@
         function handleCredentialResponse(response) {
             const responsePayload = decodeJwtResponse(response.credential);
 
+            // Fetch higher res profile pic if possible
+            let picUrl = responsePayload.picture;
+            if(picUrl.includes('=s96-c')) {
+                picUrl = picUrl.replace('=s96-c', '=s400-c');
+            }
+
             document.getElementById('user-name').textContent = responsePayload.name;
             document.getElementById('user-email').textContent = responsePayload.email;
-            document.getElementById('user-pic').src = responsePayload.picture;
+            document.getElementById('user-pic').src = picUrl;
 
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('game-section').classList.remove('hidden');
-            document.getElementById('game-section').classList.add('flex');
+            // Animate transition
+            const loginSec = document.getElementById('login-section');
+            loginSec.style.opacity = '0';
+            loginSec.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                loginSec.classList.add('hidden');
+                document.getElementById('game-section').classList.remove('hidden');
+                document.getElementById('game-section').classList.add('flex');
+                
+                // Slight fade in for game section
+                document.getElementById('game-section').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('game-section').style.transition = 'opacity 0.5s ease';
+                    document.getElementById('game-section').style.opacity = '1';
+                }, 50);
 
-            resetGame();
+                resetGame();
+            }, 300);
         }
 
         function signOut() {
             document.getElementById('game-section').classList.add('hidden');
             document.getElementById('game-section').classList.remove('flex');
-            document.getElementById('login-section').classList.remove('hidden');
+            
+            const loginSec = document.getElementById('login-section');
+            loginSec.classList.remove('hidden');
+            
+            setTimeout(() => {
+                loginSec.style.opacity = '1';
+                loginSec.style.transform = 'scale(1)';
+            }, 50);
+
             clearTimeout(gameLoopTimeout);
         }
 
         // ==========================================
-        // Snake Game Logic & Premium Rendering
+        // Premium Snake Game Logic
         // ==========================================
 
         const canvas = document.getElementById('gameCanvas');
@@ -259,6 +365,10 @@
                 highScore = score;
                 localStorage.setItem('snakePremiumHighScore', highScore);
                 highScoreDisplay.textContent = highScore;
+                
+                // Celebrate High Score
+                highScoreDisplay.classList.add('text-yellow-400');
+                setTimeout(() => highScoreDisplay.classList.remove('text-yellow-400'), 1000);
             }
         }
 
@@ -300,16 +410,16 @@
                 advanceSnake();
                 drawSnake();
                 main();
-            }, 100); 
+            }, 90); // Slightly faster for pro feel
         }
 
         function clearCanvas() {
-            ctx.fillStyle = '#0f172a';
+            ctx.fillStyle = '#0a0a0a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function drawGrid() {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
             ctx.lineWidth = 1;
             for(let i = 0; i <= canvas.width; i += gridSize) {
                 ctx.beginPath();
@@ -324,7 +434,6 @@
             }
         }
 
-        // Rounded Rectangle Polyfill for Canvas
         CanvasRenderingContext2D.prototype.roundRect = CanvasRenderingContext2D.prototype.roundRect || function (x, y, w, h, r) {
             if (w < 2 * r) r = w / 2;
             if (h < 2 * r) r = h / 2;
@@ -342,23 +451,28 @@
             snake.forEach((part, index) => {
                 const isHead = index === 0;
                 
-                // Add Glow Effect
-                ctx.shadowBlur = isHead ? 15 : 8;
-                ctx.shadowColor = '#4ade80';
+                ctx.shadowBlur = isHead ? 20 : 5;
+                ctx.shadowColor = '#00ff88';
                 
-                ctx.fillStyle = isHead ? '#4ade80' : '#22c55e';
+                // Gradient for head
+                if (isHead) {
+                    let grad = ctx.createLinearGradient(part.x * gridSize, part.y * gridSize, (part.x+1) * gridSize, (part.y+1) * gridSize);
+                    grad.addColorStop(0, '#00ff88');
+                    grad.addColorStop(1, '#00b8ff');
+                    ctx.fillStyle = grad;
+                } else {
+                    ctx.fillStyle = `rgba(0, 255, 136, ${1 - (index/snake.length)*0.6})`; // Fading tail
+                }
                 
-                // Draw rounded segments
                 ctx.roundRect(
-                    part.x * gridSize + 2, 
-                    part.y * gridSize + 2, 
-                    gridSize - 4, 
-                    gridSize - 4, 
+                    part.x * gridSize + 1.5, 
+                    part.y * gridSize + 1.5, 
+                    gridSize - 3, 
+                    gridSize - 3, 
                     isHead ? 6 : 4
                 );
                 ctx.fill();
                 
-                // Reset shadow for next drawings
                 ctx.shadowBlur = 0;
             });
         }
@@ -370,12 +484,11 @@
             if (head.x === food.x && head.y === food.y) {
                 score += 10;
                 scoreDisplay.textContent = score;
-                // Add pop animation class to score
-                scoreDisplay.classList.remove('scale-100');
-                scoreDisplay.classList.add('scale-125');
+                
+                // Score pop animation
+                scoreDisplay.style.transform = 'scale(1.3)';
                 setTimeout(() => {
-                    scoreDisplay.classList.remove('scale-125');
-                    scoreDisplay.classList.add('scale-100');
+                    scoreDisplay.style.transform = 'scale(1)';
                 }, 150);
 
                 spawnFood();
@@ -385,22 +498,28 @@
         }
 
         function drawFood() {
-            ctx.fillStyle = '#f87171'; 
-            
-            // Neon Glow for food
             ctx.shadowBlur = 15;
-            ctx.shadowColor = '#f87171';
+            ctx.shadowColor = '#f43f5e'; // Rose-500 glow
+            
+            let grad = ctx.createRadialGradient(
+                food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, 2,
+                food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, gridSize/2
+            );
+            grad.addColorStop(0, '#fda4af');
+            grad.addColorStop(1, '#e11d48');
+            
+            ctx.fillStyle = grad;
 
             ctx.beginPath();
             ctx.arc(
                 food.x * gridSize + gridSize/2, 
                 food.y * gridSize + gridSize/2, 
-                gridSize/2 - 3, 
+                gridSize/2 - 2, 
                 0, 2 * Math.PI
             );
             ctx.fill();
             
-            ctx.shadowBlur = 0; // Reset
+            ctx.shadowBlur = 0; 
         }
 
         function spawnFood() {
