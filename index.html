@@ -1,0 +1,471 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Snake Game with Google OAuth</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Google Identity Services Library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] },
+                    colors: {
+                        darkBg: '#0b0f19',
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                        neonGreen: '#4ade80',
+                        neonRed: '#f87171'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: radial-gradient(circle at top left, #1e293b, #0b0f19);
+            color: #e2e8f0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body::-webkit-scrollbar { display: none; }
+        
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Canvas Styling */
+        canvas {
+            background-color: #0f172a;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Text Glow */
+        .neon-text-green { text-shadow: 0 0 15px rgba(74, 222, 128, 0.6); }
+        .neon-text-red { text-shadow: 0 0 15px rgba(248, 113, 113, 0.6); }
+
+        /* Custom Buttons */
+        .btn-mobile {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .btn-mobile:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center font-sans antialiased">
+
+    <!-- Main Container -->
+    <div class="w-full max-w-5xl p-4 md:p-6">
+        
+        <!-- Login Section -->
+        <div id="login-section" class="glass-card p-10 rounded-3xl max-w-md mx-auto text-center transform transition-all">
+            <div class="mb-8">
+                <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.4)] mb-6 transform rotate-12">
+                    <svg class="w-10 h-10 text-white transform -rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">SNAKE <span class="text-green-400">X</span></h1>
+                <p class="text-gray-400 text-sm">Sign in to start your premium gaming experience.</p>
+            </div>
+            
+            <div class="bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
+                <!-- Google Sign-In Button Container -->
+                <div id="buttonDiv" class="flex justify-center"></div>
+            </div>
+            
+            <p class="text-xs text-rose-400/80 mt-4 bg-rose-500/10 py-2 px-3 rounded-lg border border-rose-500/20">
+                Note: Don't forget to insert your 'YOUR_GOOGLE_CLIENT_ID' in the code.
+            </p>
+        </div>
+
+        <!-- Game & Profile Section -->
+        <div id="game-section" class="hidden flex flex-col lg:flex-row gap-6 md:gap-8 items-start justify-center">
+            
+            <!-- User Profile & Stats Card -->
+            <div class="glass-card p-6 rounded-3xl w-full lg:w-80 flex flex-col items-center text-center relative overflow-hidden">
+                <!-- Decorative gradient blob -->
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-green-500/20 rounded-full blur-3xl"></div>
+                
+                <div class="relative mb-4 group">
+                    <div class="absolute inset-0 bg-green-400 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                    <img id="user-pic" src="" alt="Profile" class="relative w-24 h-24 rounded-full border-2 border-white/20 object-cover z-10">
+                </div>
+                
+                <h2 id="user-name" class="text-xl font-bold text-white tracking-wide">Player Name</h2>
+                <p id="user-email" class="text-gray-400 text-xs mb-8">player@email.com</p>
+                
+                <div class="w-full grid grid-cols-2 gap-3 mb-8">
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
+                        <p class="text-gray-400 uppercase text-[10px] font-bold tracking-widest mb-1">Score</p>
+                        <p id="score-display" class="text-3xl font-black text-green-400 neon-text-green">0</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center">
+                        <p class="text-gray-400 uppercase text-[10px] font-bold tracking-widest mb-1">Best</p>
+                        <p id="high-score-display" class="text-2xl font-bold text-white">0</p>
+                    </div>
+                </div>
+                
+                <button onclick="signOut()" class="w-full group relative px-4 py-3 font-semibold text-white transition-all duration-300 bg-transparent border border-rose-500/50 rounded-xl hover:bg-rose-500/10 hover:border-rose-500 focus:outline-none">
+                    <span class="text-sm tracking-wider">SIGN OUT</span>
+                </button>
+            </div>
+
+            <!-- Game Area -->
+            <div class="glass-card p-6 md:p-8 rounded-3xl w-full lg:flex-1 max-w-2xl flex flex-col items-center relative">
+                
+                <div class="relative w-full flex justify-center">
+                    <canvas id="gameCanvas" width="400" height="400" class="border border-white/10"></canvas>
+                    
+                    <!-- Game Over Overlay -->
+                    <div id="game-over-screen" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center rounded-xl z-20 transition-opacity">
+                        <h2 class="text-4xl font-black text-white mb-2 tracking-widest neon-text-red">GAME OVER</h2>
+                        <p class="text-gray-300 mb-8 font-medium">Final Score: <span id="final-score" class="text-green-400 font-bold text-xl">0</span></p>
+                        <button onclick="resetGame()" class="bg-green-500 hover:bg-green-400 text-slate-900 font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(74,222,128,0.4)] transition transform hover:-translate-y-1 hover:scale-105 active:scale-95 tracking-wide">
+                            PLAY AGAIN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Controls (Premium UI) -->
+                <div class="grid grid-cols-3 gap-3 mt-8 md:hidden w-48 mx-auto">
+                    <div></div>
+                    <button onclick="changeDirection({keyCode: 38})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <div></div>
+                    <button onclick="changeDirection({keyCode: 37})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
+                        <svg class="w-6 h-6 transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <button onclick="changeDirection({keyCode: 40})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
+                        <svg class="w-6 h-6 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <button onclick="changeDirection({keyCode: 39})" class="btn-mobile w-14 h-14 rounded-full flex justify-center items-center mx-auto text-white">
+                        <svg class="w-6 h-6 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                </div>
+
+                <div class="mt-6 flex items-center justify-center gap-2 hidden md:flex text-gray-500 text-sm font-medium">
+                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">W</kbd>
+                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">A</kbd>
+                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">S</kbd>
+                    <kbd class="bg-white/10 px-2 py-1 rounded border border-white/20">D</kbd>
+                    <span class="ml-2">or Arrow Keys to move</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // Google Authentication Logic
+        // ==========================================
+        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: handleCredentialResponse
+            });
+            
+            google.accounts.id.renderButton(
+                document.getElementById("buttonDiv"),
+                { theme: "filled_black", size: "large", shape: "pill", width: "250" } 
+            );
+            
+            loadHighScore();
+        };
+
+        function decodeJwtResponse(token) {
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        function handleCredentialResponse(response) {
+            const responsePayload = decodeJwtResponse(response.credential);
+
+            document.getElementById('user-name').textContent = responsePayload.name;
+            document.getElementById('user-email').textContent = responsePayload.email;
+            document.getElementById('user-pic').src = responsePayload.picture;
+
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('game-section').classList.remove('hidden');
+            document.getElementById('game-section').classList.add('flex');
+
+            resetGame();
+        }
+
+        function signOut() {
+            document.getElementById('game-section').classList.add('hidden');
+            document.getElementById('game-section').classList.remove('flex');
+            document.getElementById('login-section').classList.remove('hidden');
+            clearTimeout(gameLoopTimeout);
+        }
+
+        // ==========================================
+        // Snake Game Logic & Premium Rendering
+        // ==========================================
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-display');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+
+        let snake = [];
+        let food = {};
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let highScore = 0;
+        let gameLoopTimeout;
+        let changingDirection = false;
+        let isGameOver = false;
+
+        const gridSize = 20; 
+        const tileCount = canvas.width / gridSize;
+
+        function loadHighScore() {
+            highScore = localStorage.getItem('snakePremiumHighScore') || 0;
+            highScoreDisplay.textContent = highScore;
+        }
+
+        function saveHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('snakePremiumHighScore', highScore);
+                highScoreDisplay.textContent = highScore;
+            }
+        }
+
+        function resetGame() {
+            snake = [
+                { x: 10, y: 10 },
+                { x: 10, y: 11 },
+                { x: 10, y: 12 }
+            ];
+            dx = 0;
+            dy = -1;
+            score = 0;
+            scoreDisplay.textContent = score;
+            isGameOver = false;
+            
+            gameOverScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('flex');
+            
+            spawnFood();
+            clearTimeout(gameLoopTimeout);
+            main();
+        }
+
+        function main() {
+            if (hasGameEnded()) {
+                isGameOver = true;
+                finalScoreDisplay.textContent = score;
+                saveHighScore();
+                gameOverScreen.classList.remove('hidden');
+                gameOverScreen.classList.add('flex');
+                return;
+            }
+
+            changingDirection = false;
+            gameLoopTimeout = setTimeout(function onTick() {
+                clearCanvas();
+                drawGrid();
+                drawFood();
+                advanceSnake();
+                drawSnake();
+                main();
+            }, 100); 
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i <= canvas.width; i += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+        }
+
+        // Rounded Rectangle Polyfill for Canvas
+        CanvasRenderingContext2D.prototype.roundRect = CanvasRenderingContext2D.prototype.roundRect || function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.beginPath();
+            this.moveTo(x+r, y);
+            this.arcTo(x+w, y,   x+w, y+h, r);
+            this.arcTo(x+w, y+h, x,   y+h, r);
+            this.arcTo(x,   y+h, x,   y,   r);
+            this.arcTo(x,   y,   x+w, y,   r);
+            this.closePath();
+            return this;
+        }
+
+        function drawSnake() {
+            snake.forEach((part, index) => {
+                const isHead = index === 0;
+                
+                // Add Glow Effect
+                ctx.shadowBlur = isHead ? 15 : 8;
+                ctx.shadowColor = '#4ade80';
+                
+                ctx.fillStyle = isHead ? '#4ade80' : '#22c55e';
+                
+                // Draw rounded segments
+                ctx.roundRect(
+                    part.x * gridSize + 2, 
+                    part.y * gridSize + 2, 
+                    gridSize - 4, 
+                    gridSize - 4, 
+                    isHead ? 6 : 4
+                );
+                ctx.fill();
+                
+                // Reset shadow for next drawings
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        function advanceSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head); 
+
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreDisplay.textContent = score;
+                // Add pop animation class to score
+                scoreDisplay.classList.remove('scale-100');
+                scoreDisplay.classList.add('scale-125');
+                setTimeout(() => {
+                    scoreDisplay.classList.remove('scale-125');
+                    scoreDisplay.classList.add('scale-100');
+                }, 150);
+
+                spawnFood();
+            } else {
+                snake.pop(); 
+            }
+        }
+
+        function drawFood() {
+            ctx.fillStyle = '#f87171'; 
+            
+            // Neon Glow for food
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#f87171';
+
+            ctx.beginPath();
+            ctx.arc(
+                food.x * gridSize + gridSize/2, 
+                food.y * gridSize + gridSize/2, 
+                gridSize/2 - 3, 
+                0, 2 * Math.PI
+            );
+            ctx.fill();
+            
+            ctx.shadowBlur = 0; // Reset
+        }
+
+        function spawnFood() {
+            food = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+            snake.forEach(function isFoodOnSnake(part) {
+                if (part.x === food.x && part.y === food.y) spawnFood();
+            });
+        }
+
+        function hasGameEnded() {
+            for (let i = 4; i < snake.length; i++) {
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+            }
+            const hitLeftWall = snake[0].x < 0;
+            const hitRightWall = snake[0].x >= tileCount;
+            const hitToptWall = snake[0].y < 0;
+            const hitBottomWall = snake[0].y >= tileCount;
+
+            return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
+        }
+
+        function changeDirection(event) {
+            if (changingDirection || isGameOver) return;
+            
+            const LEFT_KEY = 37;
+            const RIGHT_KEY = 39;
+            const UP_KEY = 38;
+            const DOWN_KEY = 40;
+            const W_KEY = 87;
+            const A_KEY = 65;
+            const S_KEY = 83;
+            const D_KEY = 68;
+
+            const keyPressed = event.keyCode;
+            const goingUp = dy === -1;
+            const goingDown = dy === 1;
+            const goingRight = dx === 1;
+            const goingLeft = dx === -1;
+
+            if ((keyPressed === LEFT_KEY || keyPressed === A_KEY) && !goingRight) {
+                dx = -1; dy = 0; changingDirection = true;
+            }
+            if ((keyPressed === UP_KEY || keyPressed === W_KEY) && !goingDown) {
+                dx = 0; dy = -1; changingDirection = true;
+            }
+            if ((keyPressed === RIGHT_KEY || keyPressed === D_KEY) && !goingLeft) {
+                dx = 1; dy = 0; changingDirection = true;
+            }
+            if ((keyPressed === DOWN_KEY || keyPressed === S_KEY) && !goingUp) {
+                dx = 0; dy = 1; changingDirection = true;
+            }
+        }
+
+        document.addEventListener("keydown", changeDirection);
+        window.addEventListener("keydown", function(e) {
+            if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+                e.preventDefault();
+            }
+        }, false);
+    </script>
+</body>
+</html>
+
+
+
